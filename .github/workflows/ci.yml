@@ -55,7 +55,9 @@ jobs:
           cache: true
       - run: flutter pub get
       - name: Build release APK (unsigned)
-        run: flutter build apk --release
+        # Fork satria: 64-bit ARM only (arm64-v8a) -- every current Android phone;
+        # about a third of the universal APK.
+        run: flutter build apk --release --target-platform android-arm64
       - name: Collect
         run: |
           mkdir -p out
