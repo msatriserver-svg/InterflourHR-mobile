@@ -81,12 +81,6 @@ class _PunchScreenState extends ConsumerState<PunchScreen> {
     if (mounted) setState(() => _preparation = preparation);
   }
 
-  /// Runs the presence check first when the server has face detection on
-  /// for this company -- a liveness-style nudge, not a security control (see
-  /// FacePresenceGate). Camera failure or a declined permission still lets
-  /// the punch through via that screen's own skip button, so hardware never
-  /// blocks the one action this whole screen exists for.
-  ///
   /// Fork satria: instead of the automatic presence gate (it never fired on
   /// some phones and had no button), the person takes a selfie that goes to
   /// the server with the punch -- when the company requires a photo, or has
