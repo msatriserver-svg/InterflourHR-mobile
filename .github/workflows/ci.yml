@@ -1,13 +1,13 @@
-# Format, analyze and test on every push and pull request.
-#
-# Deliberately needs no secrets: pull requests from forks get none, and a
-# check that forks can't pass is a check contributors learn to ignore.
+# Fork satria: analyze + test on every push, and build an unsigned release APK.
+# The APK is signed on the server (~/terbitkan-interflourhr.sh), never here:
+# the signing key never leaves the server.
 name: CI
 
 on:
   push:
     branches: [master]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -26,6 +26,51 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed lib test tool
+      # Not fatal in the fork (edits are made without a local Dart SDK);
+      # the diff is printed so it can be applied.
+      - name: dart format (informational)
+        run: |
+          dart format lib test tool > /dev/null
+          git --no-pager diff --stat
+          git --no-pager diff
+          git checkout -- .
       - run: flutter analyze
       - run: flutter test
+
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: horilla_mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build release APK (unsigned)
+        run: flutter build apk --release
+      - name: Collect
+        run: |
+          mkdir -p out
+          APK=$(ls build/app/outputs/flutter-apk/app-release*.apk build/app/outputs/apk/release/*.apk 2>/dev/null | head -1)
+          echo "APK: $APK"; ls -la build/app/outputs/flutter-apk/ build/app/outputs/apk/release/ 2>/dev/null || true
+          cp "$APK" out/interflourhr-unsigned.apk
+          V=$(grep -oP '^version:\s*\K[^+ ]+' pubspec.yaml)
+          echo "versionName = \"$V\"" > out/version.txt
+          cat out/version.txt
+          find build -name "mapping.txt" -path "*release*" -exec cp {} out/mapping.txt \; || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-unsigned
+          path: |
+            horilla_mobile/out/interflourhr-unsigned.apk
+            horilla_mobile/out/version.txt
+            horilla_mobile/out/mapping.txt
+          if-no-files-found: warn

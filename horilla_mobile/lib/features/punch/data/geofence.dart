@@ -96,3 +96,33 @@ FencePosition? evaluateFence({
     radius: radiusInMetres.toDouble(),
   );
 }
+
+/// Where the caller stands relative to the nearest of several places.
+///
+/// A place whose radius contains the caller wins over one whose centre is
+/// merely closer; otherwise the place the caller is least far outside of.
+/// Null when no place is usable, which leaves the decision to the server.
+FencePosition? evaluateNearestFence({
+  required List<({double latitude, double longitude, int radius})> places,
+  required double latitude,
+  required double longitude,
+}) {
+  FencePosition? best;
+  for (final place in places) {
+    final position = evaluateFence(
+      fenceLatitude: place.latitude,
+      fenceLongitude: place.longitude,
+      radiusInMetres: place.radius,
+      latitude: latitude,
+      longitude: longitude,
+    );
+    if (position == null) continue;
+    if (best == null ||
+        (position.isInside && !best.isInside) ||
+        (position.isInside == best.isInside &&
+            position.metresOutside < best.metresOutside)) {
+      best = position;
+    }
+  }
+  return best;
+}

@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Horilla HR",
+  "appTitle": "Interflour HR",
   "signInHeadline": "Your workday,\nin your pocket.",
   "@signInHeadline": {
     "description": "Sign-in screen headline. The line break is intentional; it is set as two lines in the design."

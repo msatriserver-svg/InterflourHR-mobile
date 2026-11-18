@@ -23,8 +23,8 @@ android {
 
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.cybrosys.horilla_project"
+        // Fork satria: own id, installs beside (not over) the store app.
+        applicationId = "com.satriaweb.interflourhr"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -68,11 +68,9 @@ kotlin {
 dependencies {
 //    implementation("com.regula.face:api:6.1.3163")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-    implementation("com.google.mlkit:text-recognition:16.0.0")
-    implementation("com.google.mlkit:text-recognition-chinese:16.0.0")
-    implementation("com.google.mlkit:text-recognition-devanagari:16.0.0")
-    implementation("com.google.mlkit:text-recognition-japanese:16.0.0")
-    implementation("com.google.mlkit:text-recognition-korean:16.0.0")
+    // Fork satria: the five ML Kit text-recognition libraries were removed --
+    // nothing in lib/ uses text recognition, they only added size and more
+    // Google SDK code to the APK.
     // Add your other dependencies here
 }
 

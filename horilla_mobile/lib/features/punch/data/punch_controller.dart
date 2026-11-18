@@ -80,10 +80,18 @@ class PunchController {
       return PunchPreparation(
         isClockingIn: isClockingIn,
         coordinates: coordinates,
-        fence: evaluateFence(
-          fenceLatitude: geofence.latitude,
-          fenceLongitude: geofence.longitude,
-          radiusInMetres: geofence.radiusInMeters,
+        // Location groups give several places; the single company fence
+        // arrives as one. No usable place leaves the decision to the server,
+        // which still receives the coordinates.
+        fence: evaluateNearestFence(
+          places: [
+            for (final point in geofence.allPoints)
+              (
+                latitude: point.latitude,
+                longitude: point.longitude,
+                radius: point.radiusInMeters,
+              ),
+          ],
           latitude: coordinates.latitude,
           longitude: coordinates.longitude,
         ),

@@ -16,7 +16,9 @@ import '../../../shared/widgets/pressable.dart';
 /// The host field is on the first screen rather than buried in settings
 /// because self-hosted installs are the common case for this product.
 /// Server the host field starts on. See the controller below for why.
-const String kDefaultHost = 'https://hr.demo.horilla.com';
+// Fork satria: the company server, not the public demo -- a demo default
+// sends whoever forgets to change it their real password to someone else.
+const String kDefaultHost = 'https://hr.satri.duckdns.org';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key, this.onSignedIn});

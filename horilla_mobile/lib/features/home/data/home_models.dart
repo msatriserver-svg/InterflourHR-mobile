@@ -36,23 +36,78 @@ class PunchState {
   }
 }
 
+/// One permitted place: a centre and the radius around it.
+class FencePoint {
+  const FencePoint({
+    required this.latitude,
+    required this.longitude,
+    required this.radiusInMeters,
+    this.name,
+  });
+
+  final double latitude;
+  final double longitude;
+  final int radiusInMeters;
+  final String? name;
+
+  /// Null when the entry is missing a coordinate or the radius.
+  static FencePoint? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final latitude = GeofenceState._toDouble(json['latitude']);
+    final longitude = GeofenceState._toDouble(json['longitude']);
+    final radius = json['radius_in_meters'];
+    if (latitude == null || longitude == null || radius is! int) return null;
+    final name = json['name'];
+    return FencePoint(
+      latitude: latitude,
+      longitude: longitude,
+      radiusInMeters: radius,
+      name: name is String ? name : null,
+    );
+  }
+}
+
 class GeofenceState {
   const GeofenceState({
     required this.enabled,
     this.latitude,
     this.longitude,
     this.radiusInMeters,
+    this.points = const [],
   });
 
   final bool enabled;
+
+  /// The single company fence (older servers, and companies without
+  /// location groups).
   final double? latitude;
   final double? longitude;
   final int? radiusInMeters;
+
+  /// Location groups: every place this employee may punch at. When the
+  /// server sends these it sends no single centre above.
+  final List<FencePoint> points;
+
+  /// Every place to check against: the group points, else the single fence.
+  List<FencePoint> get allPoints {
+    if (points.isNotEmpty) return points;
+    if (latitude == null || longitude == null || radiusInMeters == null) {
+      return const [];
+    }
+    return [
+      FencePoint(
+        latitude: latitude!,
+        longitude: longitude!,
+        radiusInMeters: radiusInMeters!,
+      ),
+    ];
+  }
 
   static GeofenceState fromJson(Map<String, dynamic>? json) {
     if (json == null || json['enabled'] != true) {
       return const GeofenceState(enabled: false);
     }
+    final rawPoints = json['points'];
     return GeofenceState(
       enabled: true,
       latitude: _toDouble(json['latitude']),
@@ -60,6 +115,9 @@ class GeofenceState {
       radiusInMeters: json['radius_in_meters'] is int
           ? json['radius_in_meters'] as int
           : null,
+      points: rawPoints is List
+          ? rawPoints.map(FencePoint.fromJson).whereType<FencePoint>().toList()
+          : const [],
     );
   }
 
