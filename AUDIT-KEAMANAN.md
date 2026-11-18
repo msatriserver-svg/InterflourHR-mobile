@@ -13,6 +13,7 @@ Fork: `com.satriaweb.interflourhr`, server bawaan `https://hr.satri.duckdns.org`
 | 4 | Sedang | **Google ML Kit face detection** (deteksi wajah di perangkat). Gambar tidak dikirim, tetapi SDK ML Kit mengirim metrik pemakaian/performa API ke Google. Dipakai hanya bila fitur Face Detection di server aktif (Interflour: belum). | **Belum diubah di rilis ini** (rilis kecil, satu perubahan berisiko per rilis). Usulan rilis berikut: buang ML Kit + gerbang wajah bila Face Detection tidak dipakai. |
 | 5 | Rendah | Lima pustaka ML Kit text-recognition (Latin/Cina/Devanagari/Jepang/Korea) dimuat padahal tidak dipakai di kode Dart — ukuran APK + kode Google tambahan. | Dibuang. |
 | 6 | Rendah | Izin `READ/WRITE_EXTERNAL_STORAGE` tidak dipakai; izin `ACCESS_NETWORK-STATE` salah ketik (tidak berlaku). | Izin penyimpanan dibuang; nama izin diperbaiki. |
+| 6b | Rendah | Plugin kamera menggabungkan izin `RECORD_AUDIO` dan izin penyimpanan ke manifest akhir, padahal kamera selalu dibuka `enableAudio: false` dan foto masuk cache aplikasi. | mi2: dibuang dengan `tools:node="remove"`. |
 | 7 | Info | Release tanpa `signingConfig` di repo. | Dipertahankan: APK dibangun tanpa tanda tangan di GitHub Actions, ditandatangani di server (kunci tidak pernah di GitHub). |
 
 ## Yang sudah baik (tidak diubah)
