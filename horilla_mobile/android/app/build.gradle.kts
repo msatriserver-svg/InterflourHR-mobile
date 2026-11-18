@@ -35,6 +35,14 @@ android {
         // check the Play Console before the first upload.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Fork satria: arm64 only. The Flutter engine is built for arm64 alone
+        // (--target-platform android-arm64); without this filter ML Kit's
+        // 32-bit/x86 libraries still mark the APK installable on phones where
+        // it would crash at start.
+        ndk {
+            abiFilters.clear()
+            abiFilters.add("arm64-v8a")
+        }
     }
 
     buildTypes {
