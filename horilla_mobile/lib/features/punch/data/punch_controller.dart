@@ -124,7 +124,7 @@ class PunchController {
           'longitude': preparation.coordinates!.longitude,
         },
       };
-      final Object body = photoPath == null
+      final Object payload = photoPath == null
           ? fields
           : FormData.fromMap({
               ...fields,
@@ -133,7 +133,7 @@ class PunchController {
                 filename: 'punch.jpg',
               ),
             });
-      final response = await dio.post<dynamic>(path, data: body);
+      final response = await dio.post<dynamic>(path, data: payload);
       // Clock-in answers 200 with {"error": "..."} when the employee has no
       // work information. That is a refusal, not a saved punch.
       final body = response.data;

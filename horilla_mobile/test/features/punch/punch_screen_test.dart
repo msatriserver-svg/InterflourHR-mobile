@@ -37,7 +37,10 @@ class _FakePunchController implements PunchController {
   }) async => PunchPreparation(isClockingIn: isClockingIn);
 
   @override
-  Future<void> submit(PunchPreparation preparation) async {
+  Future<void> submit(
+    PunchPreparation preparation, {
+    String? photoPath,
+  }) async {
     submitCalls++;
     // A second call is exactly the server behaviour this bug produced: the
     // real endpoint has no queue, so calling it twice for one hold is the
