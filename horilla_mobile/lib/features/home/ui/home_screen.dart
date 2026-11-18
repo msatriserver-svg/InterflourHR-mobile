@@ -98,6 +98,7 @@ class _HomeBody extends ConsumerWidget {
                     geofence: data.geofence,
                     today: data.today,
                     clockInTime: data.punch.clockInTime,
+                    photoRequired: data.punchPhotoRequired,
                   ),
                 ),
               ),

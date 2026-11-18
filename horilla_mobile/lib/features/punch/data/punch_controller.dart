@@ -105,25 +105,35 @@ class PunchController {
   }
 
   /// Sends the punch, then drops the screens whose data it just changed.
-  Future<void> submit(PunchPreparation preparation) async {
+  ///
+  /// Fork satria: [photoPath], when given, goes up as multipart field
+  /// `photo` with the coordinates; the server stores it with the punch.
+  Future<void> submit(PunchPreparation preparation, {String? photoPath}) async {
     final dio = _ref.read(apiClientProvider).dio;
     final path = preparation.isClockingIn
         ? '/attendance/clock-in/'
         : '/attendance/clock-out/';
 
     try {
-      final response = await dio.post<dynamic>(
-        path,
-        data: {
-          // Sent when there is a fence; the server re-checks them and is the
-          // authority. Omitted entirely when there is no fence, rather than
-          // sent as nulls the server would have to interpret.
-          if (preparation.coordinates != null) ...{
-            'latitude': preparation.coordinates!.latitude,
-            'longitude': preparation.coordinates!.longitude,
-          },
+      final fields = <String, dynamic>{
+        // Sent when there is a fence; the server re-checks them and is the
+        // authority. Omitted entirely when there is no fence, rather than
+        // sent as nulls the server would have to interpret.
+        if (preparation.coordinates != null) ...{
+          'latitude': preparation.coordinates!.latitude,
+          'longitude': preparation.coordinates!.longitude,
         },
-      );
+      };
+      final Object body = photoPath == null
+          ? fields
+          : FormData.fromMap({
+              ...fields,
+              'photo': await MultipartFile.fromFile(
+                photoPath,
+                filename: 'punch.jpg',
+              ),
+            });
+      final response = await dio.post<dynamic>(path, data: body);
       // Clock-in answers 200 with {"error": "..."} when the employee has no
       // work information. That is a refusal, not a saved punch.
       final body = response.data;

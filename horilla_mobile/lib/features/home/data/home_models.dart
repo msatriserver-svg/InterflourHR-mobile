@@ -251,6 +251,7 @@ class HomeData {
     required this.unreadNotifications,
     this.announcement,
     this.pendingApprovals,
+    this.punchPhotoRequired = false,
   });
 
   final SignedInUser user;
@@ -266,6 +267,9 @@ class HomeData {
   /// to counting the full inbox client-side when this is absent.
   final PendingApprovals? pendingApprovals;
 
+  /// Fork satria: the company requires a selfie with each punch.
+  final bool punchPhotoRequired;
+
   static HomeData fromJson(Map<String, dynamic> json) {
     Map<String, dynamic>? sub(String key) => json[key] is Map<String, dynamic>
         ? json[key] as Map<String, dynamic>
@@ -276,6 +280,7 @@ class HomeData {
       capabilities: Capabilities.fromJson(sub('capabilities')),
       punch: PunchState.fromJson(sub('punch')),
       geofence: GeofenceState.fromJson(sub('geofence')),
+      punchPhotoRequired: sub('punch_photo')?['required'] == true,
       today: TodayTotals.fromJson(sub('today')),
       onLeaveToday: json['on_leave_today'] is List
           ? (json['on_leave_today'] as List)

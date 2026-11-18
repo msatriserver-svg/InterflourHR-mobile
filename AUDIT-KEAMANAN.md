@@ -16,6 +16,9 @@ Fork: `com.satriaweb.interflourhr`, server bawaan `https://hr.satri.duckdns.org`
 | 6b | Rendah | Plugin kamera menggabungkan izin `RECORD_AUDIO` dan izin penyimpanan ke manifest akhir, padahal kamera selalu dibuka `enableAudio: false` dan foto masuk cache aplikasi. | mi2: dibuang dengan `tools:node="remove"`. |
 | 7 | Info | Release tanpa `signingConfig` di repo. | Dipertahankan: APK dibangun tanpa tanda tangan di GitHub Actions, ditandatangani di server (kunci tidak pernah di GitHub). |
 
+## Perubahan fitur
+- **mi5 — Foto absen.** Gerbang deteksi wajah otomatis (ML Kit) tidak pernah lolos di Samsung S24 Ultra dan tidak punya tombol. Diganti layar kamera dengan tombol *Take photo* → *Use photo*; foto dikirim bersama absen (multipart `photo` + koordinat) dan disimpan server (tanpa EXIF) untuk diperiksa HR. Muncul bila server mewajibkan foto (`punch_photo.required`) atau Face Detection aktif. Catatan: deteksi wajah Horilla tidak pernah mencocokkan identitas (hanya "ada wajah").
+
 ## Yang sudah baik (tidak diubah)
 - Tidak ada Firebase / analytics / crash reporter / iklan (dicek di `pubspec.lock` dan konfigurasi Android).
 - Token login di Keystore (`flutter_secure_storage`), bukan shared_preferences.

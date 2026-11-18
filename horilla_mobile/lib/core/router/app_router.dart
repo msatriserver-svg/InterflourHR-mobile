@@ -25,9 +25,9 @@ import '../../features/employee/ui/directory_screen.dart';
 import '../../features/employee/ui/me_screen.dart';
 import '../../features/employee/ui/personal_info_screen.dart';
 import '../../features/facedetection/ui/face_enrolment_screen.dart';
-import '../../features/facedetection/ui/face_presence_gate.dart';
 import '../../features/home/data/home_models.dart';
 import '../../features/home/ui/home_screen.dart';
+import '../../features/punch/ui/punch_photo_screen.dart';
 import '../../features/punch/ui/punch_screen.dart';
 import '../../features/leave/ui/leave_allocation_screen.dart';
 import '../../features/leave/ui/leave_apply_screen.dart';
@@ -95,12 +95,13 @@ GoRouter buildRouter({
                 : const GeofenceState(enabled: false),
             today: args is PunchArgs ? args.today : TodayTotals.zero,
             clockInTime: args is PunchArgs ? args.clockInTime : null,
+            photoRequired: args is PunchArgs && args.photoRequired,
           );
         },
         routes: [
           GoRoute(
-            path: 'face-check',
-            builder: (context, state) => const FacePresenceGate(),
+            path: 'photo',
+            builder: (context, state) => const PunchPhotoScreen(),
           ),
         ],
       ),

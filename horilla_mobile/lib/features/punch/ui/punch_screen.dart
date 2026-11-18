@@ -34,12 +34,16 @@ class PunchScreen extends ConsumerStatefulWidget {
     required this.geofence,
     this.today = TodayTotals.zero,
     this.clockInTime,
+    this.photoRequired = false,
   });
 
   final bool isClockingIn;
   final GeofenceState geofence;
   final TodayTotals today;
   final String? clockInTime;
+
+  /// Fork satria: take a selfie and send it with the punch.
+  final bool photoRequired;
 
   @override
   ConsumerState<PunchScreen> createState() => _PunchScreenState();
@@ -82,16 +86,23 @@ class _PunchScreenState extends ConsumerState<PunchScreen> {
   /// FacePresenceGate). Camera failure or a declined permission still lets
   /// the punch through via that screen's own skip button, so hardware never
   /// blocks the one action this whole screen exists for.
+  ///
+  /// Fork satria: instead of the automatic presence gate (it never fired on
+  /// some phones and had no button), the person takes a selfie that goes to
+  /// the server with the punch -- when the company requires a photo, or has
+  /// face detection switched on.
   Future<void> _confirmThenSubmit() async {
     final session = ref.read(sessionProvider);
-    if (session != null && session.faceDetectionEnabled) {
-      final confirmed = await context.push<bool>('/punch/face-check');
-      if (confirmed != true) return;
+    String? photoPath;
+    if (widget.photoRequired ||
+        (session != null && session.faceDetectionEnabled)) {
+      photoPath = await context.push<String>('/punch/photo');
+      if (photoPath == null) return;
     }
-    await _submit();
+    await _submit(photoPath: photoPath);
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit({String? photoPath}) async {
     final preparation = _preparation;
     // _confirmedAt: the punch already landed. A late second call from the
     // same hold must not surface "Already clocked-out" over the success.
@@ -108,7 +119,9 @@ class _PunchScreenState extends ConsumerState<PunchScreen> {
     });
 
     try {
-      await ref.read(punchControllerProvider).submit(preparation);
+      await ref
+          .read(punchControllerProvider)
+          .submit(preparation, photoPath: photoPath);
       final at = DateFormat('HH:mm').format(DateTime.now());
       ref
           .read(toastProvider.notifier)
@@ -611,10 +624,12 @@ class PunchArgs {
     required this.geofence,
     this.today = TodayTotals.zero,
     this.clockInTime,
+    this.photoRequired = false,
   });
 
   final bool isClockingIn;
   final GeofenceState geofence;
   final TodayTotals today;
   final String? clockInTime;
+  final bool photoRequired;
 }

@@ -8,7 +8,7 @@ publish_to: 'none'
 # was a reliable record. 17 clears the highest version actually observed.
 # Confirm against the Play Console before the first store upload; a device
 # sample is a floor, not proof of the maximum.
-version: 2.0.0-mi4+21
+version: 2.0.0-mi5+22
 
 environment:
   sdk: ^3.9.0
