@@ -141,6 +141,47 @@ void main() {
       expect(balance!.totalDays, 4);
     });
 
+    test('a dispensation has no balance, only days per event', () {
+      final balance = LeaveBalance.fromJson({
+        'id': 1,
+        'leave_type_id': {
+          'id': 15,
+          'name': 'Dispensasi Menikah',
+          'limit_leave': false,
+          'is_dispensation': true,
+          'days_per_event': 3.0,
+        },
+        'available_days': 100000.0,
+        'carryforward_days': 0,
+      });
+      expect(balance!.unlimited, isTrue);
+      expect(balance.type.isDispensation, isTrue);
+      expect(balance.type.dispensationDays, 3);
+      expect(balance.unlimitedLabel, 'max 3 days per event');
+    });
+
+    test('an unlimited type without dispensation says no limit', () {
+      final balance = LeaveBalance.fromJson({
+        'id': 1,
+        'leave_type_id': {'id': 9, 'name': 'Unpaid', 'limit_leave': false},
+        'available_days': 100000,
+        'carryforward_days': 0,
+      });
+      expect(balance!.unlimited, isTrue);
+      expect(balance.type.isDispensation, isFalse);
+      expect(balance.unlimitedLabel, 'no limit');
+    });
+
+    test('an older server without the flags keeps showing the balance', () {
+      final balance = LeaveBalance.fromJson({
+        'id': 1,
+        'leave_type_id': {'id': 2, 'name': 'Casual'},
+        'available_days': 5,
+        'carryforward_days': 0,
+      });
+      expect(balance!.unlimited, isFalse);
+    });
+
     test('a balance without a leave type is discarded', () {
       expect(LeaveBalance.fromJson({'id': 1, 'available_days': 3}), isNull);
     });

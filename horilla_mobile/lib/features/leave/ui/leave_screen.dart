@@ -269,10 +269,11 @@ class _BalanceCard extends StatelessWidget {
       // Its own node, so each balance is a separate screen-reader stop
       // rather than being merged with its neighbours.
       container: true,
-      label:
-          '${balance.type.name}: ${formatDays(total)} '
-          '${total == 1 ? 'day' : 'days'} available'
-          '${carried > 0 ? ', ${formatDays(carried)} carried forward' : ''}',
+      label: balance.unlimited
+          ? '${balance.type.name}: ${balance.unlimitedLabel}'
+          : '${balance.type.name}: ${formatDays(total)} '
+                '${total == 1 ? 'day' : 'days'} available'
+                '${carried > 0 ? ', ${formatDays(carried)} carried forward' : ''}',
       excludeSemantics: true,
       child: AppCard(
         padding: const EdgeInsets.fromLTRB(10, 16, 10, 14),
@@ -284,7 +285,7 @@ class _BalanceCard extends StatelessWidget {
               child: CustomPaint(
                 painter: _DonutPainter(
                   color: total <= 0 ? AppColors.line : color,
-                  carriedShare: carriedShare,
+                  carriedShare: balance.unlimited ? 0.0 : carriedShare,
                 ),
                 child: Center(
                   child: FittedBox(
@@ -292,7 +293,11 @@ class _BalanceCard extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Text(
-                        formatDays(total),
+                        balance.unlimited
+                            ? (balance.type.isDispensation
+                                  ? formatDays(balance.type.dispensationDays!)
+                                  : '∞')
+                            : formatDays(total),
                         style: AppText.mono.copyWith(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
@@ -313,7 +318,11 @@ class _BalanceCard extends StatelessWidget {
               style: AppText.cardTitle.copyWith(fontSize: 13),
             ),
             Text(
-              carried > 0 ? '+${formatDays(carried)} carried' : 'days left',
+              balance.unlimited
+                  ? (balance.type.isDispensation ? 'days per event' : 'no limit')
+                  : carried > 0
+                  ? '+${formatDays(carried)} carried'
+                  : 'days left',
               textAlign: TextAlign.center,
               style: AppText.mono.copyWith(fontSize: 10, color: AppColors.ink4),
             ),

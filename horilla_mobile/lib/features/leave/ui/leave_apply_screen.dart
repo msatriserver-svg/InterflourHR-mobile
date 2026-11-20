@@ -358,9 +358,10 @@ class _TypeCard extends StatelessWidget {
       inMutuallyExclusiveGroup: true,
       checked: selected,
       button: true,
-      label:
-          '${balance.type.name}, ${formatDays(days)} '
-          '${days == 1 ? 'day' : 'days'} available',
+      label: balance.unlimited
+          ? '${balance.type.name}, ${balance.unlimitedLabel}'
+          : '${balance.type.name}, ${formatDays(days)} '
+                '${days == 1 ? 'day' : 'days'} available',
       excludeSemantics: true,
       child: Pressable(
         onTap: onTap,
@@ -396,8 +397,12 @@ class _TypeCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${formatDays(days)} ${days == 1 ? 'day' : 'days'} '
-                      'available',
+                      balance.unlimited
+                          ? (balance.type.isDispensation
+                                ? 'Dispensation · ${balance.unlimitedLabel}'
+                                : 'No limit')
+                          : '${formatDays(days)} ${days == 1 ? 'day' : 'days'} '
+                                'available',
                       style: AppText.meta.copyWith(
                         color: selected
                             ? AppColors.brandTintInk
@@ -844,7 +849,8 @@ class _SummaryCard extends StatelessWidget {
       days =
           'About ${formatDays(estimate)} '
           '${estimate == 1 ? 'day' : 'days'}';
-      final left = b == null ? null : b.totalDays - estimate;
+      final left = b == null || b.unlimited ? null : b.totalDays - estimate;
+      final perEvent = b?.type.dispensationDays;
       after = left == null ? null : formatDays(left < 0 ? 0 : left);
       final crossed = [
         for (final h in holidays)
@@ -852,7 +858,13 @@ class _SummaryCard extends StatelessWidget {
               !h.startDate.isAfter(a.endDate))
             '${h.name} (${fmt.format(h.startDate)})',
       ];
-      if (left != null && left < 0) {
+      if (perEvent != null && estimate > perEvent) {
+        warn = true;
+        note =
+            'This dispensation allows at most ${formatDays(perEvent)} '
+            '${perEvent == 1 ? 'day' : 'days'} per event — the server will '
+            'refuse it.';
+      } else if (left != null && left < 0) {
         warn = true;
         note =
             'More than your ${formatDays(b!.totalDays)}-day balance — '

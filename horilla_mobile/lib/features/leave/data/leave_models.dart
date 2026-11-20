@@ -41,18 +41,38 @@ enum LeaveStatus {
 }
 
 class LeaveType {
-  const LeaveType({required this.id, required this.name});
+  const LeaveType({
+    required this.id,
+    required this.name,
+    this.unlimited = false,
+    this.dispensationDays,
+  });
 
   final int id;
   final String name;
+
+  /// The type has no day limit (server `limit_leave: false`). Its stored
+  /// balance is a technical 100000, never something to show.
+  final bool unlimited;
+
+  /// Set for a dispensation (paid permission per event): the most days one
+  /// request may cover. Implies [unlimited].
+  final double? dispensationDays;
+
+  bool get isDispensation => dispensationDays != null;
 
   static LeaveType? fromJson(Object? value) {
     if (value is! Map<String, dynamic>) return null;
     final name = value['name'];
     if (name is! String || name.isEmpty) return null;
+    final dispensation = value['is_dispensation'] == true;
     return LeaveType(
       id: value['id'] is int ? value['id'] as int : 0,
       name: name,
+      unlimited: value['limit_leave'] == false || dispensation,
+      dispensationDays: dispensation
+          ? (_toDouble(value['days_per_event']) ?? 0)
+          : null,
     );
   }
 }
@@ -74,6 +94,15 @@ class LeaveBalance {
   /// What the employee can actually take. The server sends this too, but it
   /// is derived, so it is recomputed rather than trusted to be present.
   double get totalDays => availableDays + carryforwardDays;
+
+  /// No balance to show (see [LeaveType.unlimited]).
+  bool get unlimited => type.unlimited;
+
+  /// Short text in place of the number for an unlimited type.
+  String get unlimitedLabel => type.isDispensation
+      ? 'max ${_fmtDays(type.dispensationDays!)} '
+            '${type.dispensationDays == 1 ? 'day' : 'days'} per event'
+      : 'no limit';
 
   static LeaveBalance? fromJson(Object? value) {
     if (value is! Map<String, dynamic>) return null;
@@ -247,3 +276,6 @@ class LeaveAllocationRequest {
     'description': reason.trim(),
   };
 }
+
+String _fmtDays(double d) =>
+    d == d.roundToDouble() ? d.toInt().toString() : d.toString();

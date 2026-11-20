@@ -94,7 +94,13 @@ class _LeaveAllocationScreenState extends ConsumerState<LeaveAllocationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final balances = ref.watch(leaveOverviewProvider).value?.balances ?? [];
+    // No allocation for a type without a balance (dispensation, no limit).
+    final balances = [
+      for (final b
+          in ref.watch(leaveOverviewProvider).value?.balances ??
+              const <LeaveBalance>[])
+        if (!b.unlimited) b,
+    ];
     // Preselected, as the handoff draws it and as the apply form does.
     _selected ??= balances.isEmpty ? null : balances.first;
 
